@@ -2,60 +2,61 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>MyLedger Pro - สรุปรายรับรายจ่าย</title>
+    <title>MyLedger Pro - บันทึกและสรุปการเงิน</title>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap'); body { font-family: 'Sarabun', sans-serif; }</style>
 </head>
 <body class="bg-gray-100 p-5">
+    <div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-lg">
+        <h2 class="text-2xl font-bold text-center mb-6">บันทึกและสรุปการเงิน</h2>
 
-<div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-lg">
-    <h1 class="text-2xl font-bold text-center mb-5">ระบบสรุปการเงินส่วนบุคคล</h1>
-    
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <input type="date" id="date" class="border p-2 rounded">
-        <input type="text" id="desc" placeholder="รายการ" class="border p-2 rounded">
-        <input type="number" id="amount" placeholder="จำนวนเงิน" class="border p-2 rounded">
-        <select id="type" class="border p-2 rounded">
-            <option value="plus">รายรับ</option>
-            <option value="minus">รายจ่าย</option>
-        </select>
-        <button onclick="addTransaction()" class="bg-blue-600 text-white p-2 rounded col-span-1 md:col-span-4 hover:bg-blue-700">บันทึกข้อมูล</button>
+        <form id="form" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <input type="date" id="date" required class="border p-2 rounded">
+            <input type="text" id="desc" placeholder="รายการ" required class="border p-2 rounded">
+            <input type="number" id="amount" placeholder="จำนวนเงิน" required class="border p-2 rounded">
+            <select id="type" class="border p-2 rounded">
+                <option value="plus">รายรับ</option>
+                <option value="minus">รายจ่าย</option>
+            </select>
+            <button type="submit" class="bg-blue-600 text-white p-2 rounded md:col-span-4 hover:bg-blue-700">บันทึกรายการ</button>
+        </form>
+
+        <div class="grid grid-cols-3 gap-4 mb-8 text-center text-sm">
+            <div class="bg-green-100 p-3 rounded">รายรับรวม<br><span id="sum-plus" class="font-bold text-lg">0</span></div>
+            <div class="bg-red-100 p-3 rounded">รายจ่ายรวม<br><span id="sum-minus" class="font-bold text-lg">0</span></div>
+            <div class="bg-blue-100 p-3 rounded">คงเหลือ<br><span id="sum-balance" class="font-bold text-lg">0</span></div>
+        </div>
+
+        <div id="calendar" class="bg-white p-4 rounded border shadow-sm"></div>
     </div>
-
-    <div id='calendar' class="mb-8"></div>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-green-100 p-4 rounded text-center">รายรับรวม: <span id="total-plus">0</span></div>
-        <div class="bg-red-100 p-4 rounded text-center">รายจ่ายรวม: <span id="total-minus">0</span></div>
-        <div class="bg-blue-100 p-4 rounded text-center">คงเหลือ: <span id="total-balance">0</span></div>
-    </div>
-</div>
 
 <script>
     let transactions = JSON.parse(localStorage.getItem('myLedgerData')) || [];
+    const form = document.getElementById('form');
 
-    function addTransaction() {
-        const t = {
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const newTrans = {
+            id: Date.now(),
             date: document.getElementById('date').value,
-            desc: document.getElementById('desc').value,
+            text: document.getElementById('desc').value,
             amount: parseFloat(document.getElementById('amount').value),
             type: document.getElementById('type').value
         };
-        transactions.push(t);
+        transactions.push(newTrans);
         localStorage.setItem('myLedgerData', JSON.stringify(transactions));
         location.reload();
-    }
+    });
 
-    // ตั้งค่าปฏิทิน
     document.addEventListener('DOMContentLoaded', function() {
-        var calendarEl = document.getElementById('calendar');
-        var calendar = new FullCalendar.Calendar(calendarEl, {
+        const calendarEl = document.getElementById('calendar');
+        const calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
             events: transactions.map(t => ({
                 title: (t.type === 'plus' ? '+' : '-') + t.amount,
                 start: t.date,
-                backgroundColor: t.type === 'plus' ? '#2ecc71' : '#e74c3c'
+                backgroundColor: t.type === 'plus' ? '#22c55e' : '#ef4444'
             }))
         });
         calendar.render();
@@ -63,11 +64,11 @@
     });
 
     function updateSummary() {
-        const plus = transactions.filter(t => t.type === 'plus').reduce((sum, t) => sum + t.amount, 0);
-        const minus = transactions.filter(t => t.type === 'minus').reduce((sum, t) => sum + t.amount, 0);
-        document.getElementById('total-plus').innerText = plus;
-        document.getElementById('total-minus').innerText = minus;
-        document.getElementById('total-balance').innerText = plus - minus;
+        const plus = transactions.filter(t => t.type === 'plus').reduce((s, t) => s + t.amount, 0);
+        const minus = transactions.filter(t => t.type === 'minus').reduce((s, t) => s + t.amount, 0);
+        document.getElementById('sum-plus').innerText = plus.toLocaleString();
+        document.getElementById('sum-minus').innerText = minus.toLocaleString();
+        document.getElementById('sum-balance').innerText = (plus - minus).toLocaleString();
     }
 </script>
 </body>
