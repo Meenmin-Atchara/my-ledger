@@ -8,26 +8,25 @@
         body { font-family: 'Sarabun', sans-serif; background: #f4f7f6; padding: 20px; color: #333; }
         .container { max-width: 800px; margin: auto; }
         
-        /* ส่วนสรุปภาพรวม */
         .summary-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
         .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: center; }
         .value { font-size: 18px; font-weight: 700; color: #2c3e50; margin-top: 5px; }
 
-        /* ส่วนกรองข้อมูล */
         .filter-section { background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; align-items: end; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .filter-group { display: flex; flex-direction: column; gap: 5px; }
         input, select, button { padding: 8px; border-radius: 6px; border: 1px solid #ddd; }
         
-        .btn-action { cursor: pointer; font-weight: 600; border: none; transition: 0.3s; }
+        .btn-action { cursor: pointer; font-weight: 600; border: none; transition: 0.3s; padding: 8px 15px; }
         .btn-search { background: #3498db; color: white; }
         .btn-clear { background: #95a5a6; color: white; }
         .btn-export { background: #27ae60; color: white; }
-        .btn-action:hover { opacity: 0.8; }
+        .btn-back { background: #f39c12; color: white; text-decoration: none; padding: 10px 20px; border-radius: 6px; display: inline-block; margin-top: 20px; }
+        .btn-action:hover, .btn-back:hover { opacity: 0.8; }
 
         table { width: 100%; background: white; border-collapse: collapse; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #f0f0f0; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #f0f0f0; }
         th { background: #f8f9fa; color: #7f8c8d; }
-        .footer-summary { background: #34495e; color: white; padding: 10px; font-weight: bold; text-align: right; }
+        .footer-summary { background: #34495e; color: white; padding: 15px; font-weight: bold; text-align: right; }
     </style>
 </head>
 <body>
@@ -53,16 +52,23 @@
         </div>
         <button class="btn-action btn-search" onclick="renderDashboard()">ค้นหา</button>
         <button class="btn-action btn-clear" onclick="clearFilters()">ล้างค่า</button>
-        <button class="btn-action btn-export" onclick="exportToCSV()">Export (CSV)</button>
     </div>
 
     <table>
-        <thead><tr><th>วันที่</th><th>รายการ</th><th>จำนวน (฿)</th></tr></thead>
+        <thead>
+            <tr>
+                <th>วันที่</th>
+                <th>รายการ</th>
+                <th style="text-align: right;">
+                    <button class="btn-action btn-export" onclick="exportToCSV()">Export (CSV)</button>
+                </th>
+            </tr>
+        </thead>
         <tbody id="transaction-table-body"></tbody>
         <tfoot><tr><td colspan="3" id="footer-summary" class="footer-summary">ยอดรวมสุทธิ: 0 ฿</td></tr></tfoot>
     </table>
     
-    <a href="app.html" style="display: block; margin-top: 20px; text-decoration: none;">← กลับไปหน้าบันทึก</a>
+    <a href="app.html" class="btn-back">← กลับไปหน้าบันทึก</a>
 </div>
 
 <script>
@@ -95,7 +101,7 @@
             tbody.innerHTML += `<tr>
                 <td>${t.date.split('-').reverse().join('/')}</td>
                 <td>${t.text}</td>
-                <td style="color: ${amount > 0 ? '#2ecc71' : '#e74c3c'}">${amount.toLocaleString()}</td>
+                <td style="text-align: right; color: ${amount > 0 ? '#2ecc71' : '#e74c3c'}">${amount.toLocaleString()}</td>
             </tr>`;
         });
 
@@ -122,7 +128,7 @@
         a.href = url; a.download = 'my-ledger-data.csv'; a.click();
     }
 
-    renderDashboard(); // เรียกตอนโหลดหน้าแรก
+    renderDashboard();
 </script>
 </body>
 </html>
