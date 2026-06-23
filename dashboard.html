@@ -2,106 +2,73 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Ledger - Dashboard</title>
+    <title>My Ledger - สรุปภาพรวม</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap');
-
-        body {
-            font-family: 'Sarabun', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .container {
-            max-width: 600px;
-            width: 100%;
-        }
-
-        h2 { color: white; text-align: center; margin-bottom: 20px; }
-
-        .card {
-            background: white;
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        /* ตารางสวยๆ */
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { color: #7f8c8d; padding: 12px; border-bottom: 2px solid #eee; text-align: left; }
-        td { padding: 12px; border-bottom: 1px solid #eee; color: #2c3e50; }
-
-        .btn-back {
-            display: block;
-            text-align: center;
-            margin-top: 25px;
-            padding: 12px;
-            background: #f8f9fa;
-            color: #667eea;
-            text-decoration: none;
-            border-radius: 10px;
-            font-weight: 600;
-            transition: 0.3s;
-        }
-        .btn-back:hover { background: #eee; }
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap');
+        body { font-family: 'Sarabun', sans-serif; background: #f4f7f6; padding: 20px; color: #333; }
+        .container { max-width: 800px; margin: auto; }
+        .summary-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+        .card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; }
+        .value { font-size: 24px; font-weight: 700; color: #2c3e50; margin-top: 5px; }
+        
+        table { width: 100%; background: white; border-collapse: collapse; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #f0f0f0; }
+        th { background: #f8f9fa; color: #7f8c8d; }
+        
+        .btn-back { display: inline-block; margin-top: 20px; padding: 10px 20px; background: #3498db; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>📊 สรุปภาพรวมการเงิน</h2>
+    <h2 style="text-align: center;">📊 สรุปภาพรวมการเงิน</h2>
     
-    <div class="card">
-        <table id="data-table">
-            <thead>
-                <tr>
-                    <th>วันที่</th>
-                    <th>รายการ</th>
-                    <th>จำนวน (฿)</th>
-                </tr>
-            </thead>
-            <tbody id="transaction-table-body">
-                </tbody>
-        </table>
-        <a href="app.html" class="btn-back">← กลับไปหน้าบันทึก</a>
+    <div class="summary-cards">
+        <div class="card"><p>รายรับ</p><div id="total-income" class="value" style="color: #2ecc71;">0</div></div>
+        <div class="card"><p>รายจ่าย</p><div id="total-expense" class="value" style="color: #e74c3c;">0</div></div>
+        <div class="card"><p>คงเหลือ</p><div id="balance" class="value">0</div></div>
     </div>
+
+    <table>
+        <thead><tr><th>วันที่</th><th>รายการ</th><th>จำนวน (฿)</th></tr></thead>
+        <tbody id="transaction-table-body"></tbody>
+    </table>
+    
+    <a href="app.html" class="btn-back">← กลับไปหน้าบันทึก</a>
 </div>
 
 <script>
-    function loadDashboard() {
-        // ดึงข้อมูลจาก localStorage
+    function renderDashboard() {
         const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
         const tbody = document.getElementById('transaction-table-body');
-        tbody.innerHTML = '';
+        let income = 0;
+        let expense = 0;
 
-        // เรียงลำดับรายการตามวันที่ล่าสุด
-        transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+        tbody.innerHTML = '';
+        
+        // เรียงลำดับวันที่ล่าสุดขึ้นก่อน
+        transactions.sort((a,b) => new Date(b.date) - new Date(a.date));
 
         transactions.forEach(t => {
-            // ปรับรูปแบบวันที่เป็น วัน/เดือน/ปี (ถ้าต้องการ)
-            let displayDate = t.date;
-            if(t.date) {
-                const dateParts = t.date.split('-'); // แปลงจาก YYYY-MM-DD
-                if(dateParts.length === 3) {
-                    displayDate = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
-                }
-            }
+            const amount = parseFloat(t.amount);
+            if (amount > 0) income += amount;
+            else expense += Math.abs(amount);
 
             tbody.innerHTML += `<tr>
-                <td>${displayDate || '-'}</td>
-                <td>${t.text || '-'}</td>
-                <td style="color: ${t.amount >= 0 ? '#2ecc71' : '#e74c3c'}">
-                    ${parseFloat(t.amount).toLocaleString()}
+                <td>${t.date}</td>
+                <td>${t.text}</td>
+                <td style="color: ${amount > 0 ? '#2ecc71' : '#e74c3c'}; font-weight: 600;">
+                    ${amount > 0 ? '+' : ''}${amount.toLocaleString()}
                 </td>
             </tr>`;
         });
+
+        document.getElementById('total-income').innerText = income.toLocaleString();
+        document.getElementById('total-expense').innerText = expense.toLocaleString();
+        document.getElementById('balance').innerText = (income - expense).toLocaleString();
     }
 
-    loadDashboard();
+    renderDashboard();
 </script>
 </body>
 </html>
