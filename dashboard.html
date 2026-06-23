@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>My Ledger - สรุปภาพรวม</title>
+    <title>My Ledger - สรุปภาพรวมแบบละเอียด</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap');
         body { font-family: 'Sarabun', sans-serif; background: #f4f7f6; padding: 20px; color: #333; }
@@ -11,87 +11,82 @@
         .card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; }
         .value { font-size: 24px; font-weight: 700; color: #2c3e50; margin-top: 5px; }
         
-        /* ส่วนกรองข้อมูล */
-        .controls { margin-bottom: 20px; text-align: right; }
-        select { padding: 10px; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; }
-        
+        /* ส่วนกรองข้อมูลแบบละเอียด */
+        .filter-section { background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; align-items: end; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .filter-group { display: flex; flex-direction: column; gap: 5px; }
+        input, select { padding: 8px; border-radius: 6px; border: 1px solid #ddd; }
+
         table { width: 100%; background: white; border-collapse: collapse; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid #f0f0f0; }
         th { background: #f8f9fa; color: #7f8c8d; }
         
-        .btn-back { display: inline-block; margin-top: 20px; padding: 10px 20px; background: #3498db; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; }
+        .footer-summary { background: #34495e; color: white; padding: 15px; border-radius: 0 0 12px 12px; font-weight: bold; text-align: right; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2 style="text-align: center;">📊 สรุปภาพรวมการเงิน</h2>
+    <h2 style="text-align: center;">📊 สรุปการเงินแบบละเอียด</h2>
     
-    <div class="summary-cards">
-        <div class="card"><p>รายรับ</p><div id="total-income" class="value" style="color: #2ecc71;">0</div></div>
-        <div class="card"><p>รายจ่าย</p><div id="total-expense" class="value" style="color: #e74c3c;">0</div></div>
-        <div class="card"><p>คงเหลือ</p><div id="balance" class="value">0</div></div>
-    </div>
-
-    <div class="controls">
-        <select id="time-filter" onchange="renderDashboard()">
-            <option value="all">ทั้งหมด</option>
-            <option value="daily">รายวัน (วันนี้)</option>
-            <option value="monthly">รายเดือน (เดือนนี้)</option>
-            <option value="yearly">รายปี (ปีนี้)</option>
-        </select>
+    <div class="filter-section">
+        <div class="filter-group"><span>จากวันที่</span><input type="date" id="date-from" onchange="renderDashboard()"></div>
+        <div class="filter-group"><span>ถึงวันที่</span><input type="date" id="date-to" onchange="renderDashboard()"></div>
+        <div class="filter-group"><span>ประเภท</span>
+            <select id="type-filter" onchange="renderDashboard()">
+                <option value="all">ทั้งหมด</option>
+                <option value="income">รายรับ</option>
+                <option value="expense">รายจ่าย</option>
+            </select>
+        </div>
     </div>
 
     <table>
         <thead><tr><th>วันที่</th><th>รายการ</th><th>จำนวน (฿)</th></tr></thead>
         <tbody id="transaction-table-body"></tbody>
+        <tfoot>
+            <tr><td colspan="3" id="footer-summary" class="footer-summary">ยอดรวมที่กรอง: 0 ฿</td></tr>
+        </tfoot>
     </table>
     
-    <a href="app.html" class="btn-back">← กลับไปหน้าบันทึก</a>
+    <a href="app.html" style="display: block; margin-top: 20px; text-decoration: none;">← กลับไปหน้าบันทึก</a>
 </div>
 
 <script>
     function renderDashboard() {
         const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-        const filter = document.getElementById('time-filter').value;
         const tbody = document.getElementById('transaction-table-body');
-        const now = new Date();
+        const summaryText = document.getElementById('footer-summary');
         
-        let income = 0;
-        let expense = 0;
+        const dateFrom = document.getElementById('date-from').value;
+        const dateTo = document.getElementById('date-to').value;
+        const typeFilter = document.getElementById('type-filter').value;
+
         tbody.innerHTML = '';
-        
-        // กรองข้อมูลตามเงื่อนไข
+        let totalFiltered = 0;
+
         const filtered = transactions.filter(t => {
-            const tDate = new Date(t.date);
-            if (filter === 'daily') return t.date === now.toISOString().split('T')[0];
-            if (filter === 'monthly') return tDate.getMonth() === now.getMonth() && tDate.getFullYear() === now.getFullYear();
-            if (filter === 'yearly') return tDate.getFullYear() === now.getFullYear();
-            return true; // กรณี 'all'
+            const tDate = t.date;
+            const isMatchDate = (!dateFrom || tDate >= dateFrom) && (!dateTo || tDate <= dateTo);
+            const isMatchType = typeFilter === 'all' || (typeFilter === 'income' ? t.amount > 0 : t.amount < 0);
+            return isMatchDate && isMatchType;
         });
 
-        // เรียงลำดับ
         filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
 
         filtered.forEach(t => {
             const amount = parseFloat(t.amount);
-            if (amount > 0) income += amount;
-            else expense += Math.abs(amount);
-
-            let formattedDate = t.date.split('-').reverse().join('/');
-
+            totalFiltered += amount;
+            
             tbody.innerHTML += `<tr>
-                <td>${formattedDate}</td>
+                <td>${t.date.split('-').reverse().join('/')}</td>
                 <td>${t.text}</td>
-                <td style="color: ${amount > 0 ? '#2ecc71' : '#e74c3c'}; font-weight: 600;">
-                    ${amount > 0 ? '+' : ''}${amount.toLocaleString()}
+                <td style="color: ${amount > 0 ? '#2ecc71' : '#e74c3c'}">
+                    ${amount.toLocaleString()}
                 </td>
             </tr>`;
         });
 
-        document.getElementById('total-income').innerText = income.toLocaleString();
-        document.getElementById('total-expense').innerText = expense.toLocaleString();
-        document.getElementById('balance').innerText = (income - expense).toLocaleString();
+        summaryText.innerText = `ยอดรวมสุทธิจากการกรอง: ${totalFiltered.toLocaleString()} ฿`;
     }
 
     renderDashboard();
