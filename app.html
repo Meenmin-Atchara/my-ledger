@@ -8,71 +8,110 @@
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap');
         * { box-sizing: border-box; }
         body { font-family: 'Sarabun', sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; display: flex; justify-content: center; min-height: 100vh; }
-        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); width: 100%; max-width: 400px; }
+        .container { background: white; padding: 25px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 450px; }
         
-        .header { text-align: center; margin-bottom: 20px; }
-        .nav-links { display: flex; justify-content: space-between; margin-top: 10px; font-size: 14px; }
+        /* Navbar Style */
+        .navbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #f0f0f0; }
+        .navbar a { text-decoration: none; color: #3498db; font-weight: 600; font-size: 14px; }
+
+        .balance-container { text-align: center; margin-bottom: 25px; }
+        #balance { font-size: 36px; font-weight: 600; color: #2c3e50; }
         
-        .balance-container { text-align: center; margin-bottom: 20px; }
-        #balance { font-size: 32px; font-weight: 600; color: #2c3e50; }
-        
-        .inc-exp-container { display: flex; justify-content: space-between; padding: 15px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 20px; }
+        .inc-exp-container { display: flex; gap: 10px; margin-bottom: 25px; }
+        .inc-exp-container > div { flex: 1; padding: 15px; border-radius: 12px; background: #f9f9f9; text-align: center; }
         .money { font-size: 18px; font-weight: 600; margin-top: 5px; }
         .plus { color: #2ecc71; }
         .minus { color: #e74c3c; }
         
-        form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; }
-        input, select { padding: 12px; border: 1px solid #ddd; border-radius: 6px; }
-        button { background-color: #3498db; color: white; border: none; padding: 12px; cursor: pointer; border-radius: 6px; font-weight: 600; }
-        
-        ul { list-style: none; padding: 0; }
-        li { background: #f9f9f9; padding: 10px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; border-radius: 6px; border-right: 5px solid #ccc; }
-        li.plus { border-right-color: #2ecc71; }
-        li.minus { border-right-color: #e74c3c; }
-        
-        .btn-action { border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; color: white; margin-left: 5px; }
+        form { display: flex; flex-direction: column; gap: 12px; }
+        input, select { padding: 14px; border: 1.5px solid #e1e1e1; border-radius: 10px; font-size: 15px; }
+        button { background-color: #3498db; color: white; border: none; padding: 14px; cursor: pointer; border-radius: 10px; font-weight: 600; transition: 0.3s; }
+        button:hover { background-color: #2980b9; }
+
+        ul { list-style: none; padding: 0; margin-top: 25px; }
+        li { background: white; border: 1px solid #eee; padding: 15px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .btn-action { border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; color: white; margin-left: 5px; }
         .edit-btn { background: #f39c12; }
         .delete-btn { background: #e74c3c; }
+
+        /* Modal Style */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 25px; border-radius: 16px; width: 90%; max-width: 350px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="header">
-        <h2>บันทึกรายรับ-รายจ่าย</h2>
-        <div class="nav-links">
-            <a href="index.html">← กลับหน้าแรก</a>
-            <a href="dashboard.html">ดูสรุปผล →</a>
-        </div>
+    <div class="navbar">
+        <a href="index.html">← หน้าแรก</a>
+        <h3 style="margin:0">บันทึกรายการ</h3>
+        <a href="dashboard.html">สรุปผล →</a>
     </div>
     
     <div class="balance-container">
-        <h4>ยอดคงเหลือ</h4>
+        <h4 style="margin:0; color:#7f8c8d">ยอดคงเหลือ</h4>
         <div id="balance">฿0.00</div>
     </div>
 
     <div class="inc-exp-container">
-        <div><h4>รายรับ</h4><p id="money-plus" class="money plus">+฿0.00</p></div>
-        <div><h4>รายจ่าย</h4><p id="money-minus" class="money minus">-฿0.00</p></div>
+        <div><h4 style="margin:0; font-size:12px">รายรับ</h4><p id="money-plus" class="money plus">+฿0.00</p></div>
+        <div><h4 style="margin:0; font-size:12px">รายจ่าย</h4><p id="money-minus" class="money minus">-฿0.00</p></div>
     </div>
 
     <form id="form">
         <input type="date" id="date" required />
-        <input type="text" id="text" placeholder="รายการ (เช่น ค่าข้าว)" required />
+        <input type="text" id="text" placeholder="รายการที่ใช้จ่าย" required />
         <input type="number" id="amount" placeholder="จำนวนเงิน" required min="1" step="any" />
         <select id="type">
             <option value="plus">รายรับ</option>
             <option value="minus">รายจ่าย</option>
         </select>
-        <button type="submit">เพิ่มรายการ</button>
+        <button type="submit">บันทึกรายการ</button>
     </form>
 
     <ul id="list"></ul>
 </div>
 
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <h3>แก้ไขรายการ</h3>
+        <form id="editForm">
+            <input type="date" id="editDate" required />
+            <input type="text" id="editText" required />
+            <input type="number" id="editAmount" required />
+            <button type="submit">บันทึกการแก้ไข</button>
+            <button type="button" onclick="closeModal()" style="background:#95a5a6; margin-top:5px">ยกเลิก</button>
+        </form>
+    </div>
+</div>
+
 <script>
     let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+    let editingId = null;
 
+    // ฟังก์ชันเปิด-ปิด Modal
+    function closeModal() { document.getElementById('editModal').style.display = 'none'; }
+
+    window.editTransaction = (id) => {
+        const t = transactions.find(t => t.id === id);
+        editingId = id;
+        document.getElementById('editDate').value = t.date;
+        document.getElementById('editText').value = t.text;
+        document.getElementById('editAmount').value = Math.abs(t.amount);
+        document.getElementById('editModal').style.display = 'flex';
+    };
+
+    document.getElementById('editForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const t = transactions.find(t => t.id === editingId);
+        t.date = document.getElementById('editDate').value;
+        t.text = document.getElementById('editText').value;
+        t.amount = t.amount < 0 ? -Math.abs(document.getElementById('editAmount').value) : Math.abs(document.getElementById('editAmount').value);
+        updateStorageAndUI();
+        closeModal();
+    });
+
+    // ส่วนของ Form เดิม
     const form = document.getElementById('form');
     form.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -85,7 +124,6 @@
         transactions.push(transaction);
         updateStorageAndUI();
         form.reset();
-        document.getElementById('date').value = ''; // รีเซ็ตวันที่
     });
 
     function updateStorageAndUI() {
@@ -93,47 +131,27 @@
         render();
     }
 
-    // ฟังก์ชันลบ
     window.removeTransaction = (id) => {
         transactions = transactions.filter(t => t.id !== id);
         updateStorageAndUI();
     };
 
-    // ฟังก์ชันแก้ไข
-    window.editTransaction = (id) => {
-        const t = transactions.find(t => t.id === id);
-        const newDate = prompt("แก้ไขวันที่ (YYYY-MM-DD):", t.date);
-        const newText = prompt("แก้ไขรายการ:", t.text);
-        const newAmount = prompt("แก้ไขจำนวนเงิน:", Math.abs(t.amount));
-        
-        if (newDate && newText && newAmount) {
-            t.date = newDate;
-            t.text = newText;
-            t.amount = t.amount < 0 ? -Math.abs(newAmount) : Math.abs(newAmount);
-            updateStorageAndUI();
-        }
-    };
-
     function render() {
         const list = document.getElementById('list');
         list.innerHTML = '';
-        // เรียงลำดับตามวันที่ล่าสุดก่อน
         transactions.sort((a,b) => new Date(b.date) - new Date(a.date));
-        
         transactions.forEach(t => {
             const li = document.createElement('li');
-            li.className = t.amount < 0 ? 'minus' : 'plus';
             li.innerHTML = `
-                <span>${t.date} | ${t.text}</span>
-                <span>
-                    ${t.amount > 0 ? '+' : ''}${Math.abs(t.amount).toLocaleString()}
+                <div><small>${t.date}</small><br><strong>${t.text}</strong></div>
+                <div style="text-align:right">
+                    <span class="${t.amount > 0 ? 'plus' : 'minus'}">${t.amount > 0 ? '+' : ''}${Math.abs(t.amount).toLocaleString()}</span><br>
                     <button class="btn-action edit-btn" onclick="editTransaction(${t.id})">แก้</button>
                     <button class="btn-action delete-btn" onclick="removeTransaction(${t.id})">ลบ</button>
-                </span>
+                </div>
             `;
             list.appendChild(li);
         });
-        
         const amounts = transactions.map(t => t.amount);
         document.getElementById('balance').innerText = '฿' + amounts.reduce((a, b) => a + b, 0).toLocaleString();
         document.getElementById('money-plus').innerText = '+฿' + amounts.filter(a => a > 0).reduce((a, b) => a + b, 0).toLocaleString();
