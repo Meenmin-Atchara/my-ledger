@@ -11,6 +11,8 @@
         .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); width: 100%; max-width: 400px; }
         
         .header { text-align: center; margin-bottom: 20px; }
+        .nav-links { display: flex; justify-content: space-between; margin-top: 10px; font-size: 14px; }
+        
         .balance-container { text-align: center; margin-bottom: 20px; }
         #balance { font-size: 32px; font-weight: 600; color: #2c3e50; }
         
@@ -38,7 +40,10 @@
 <div class="container">
     <div class="header">
         <h2>บันทึกรายรับ-รายจ่าย</h2>
-        <a href="index.html">กลับหน้าแรก</a>
+        <div class="nav-links">
+            <a href="index.html">← กลับหน้าแรก</a>
+            <a href="dashboard.html">ดูสรุปผล →</a>
+        </div>
     </div>
     
     <div class="balance-container">
@@ -53,8 +58,8 @@
 
     <form id="form">
         <input type="date" id="date" required />
-        <input type="text" id="text" placeholder="รายการ" required />
-        <input type="number" id="amount" placeholder="จำนวนเงิน" required min="1" />
+        <input type="text" id="text" placeholder="รายการ (เช่น ค่าข้าว)" required />
+        <input type="number" id="amount" placeholder="จำนวนเงิน" required min="1" step="any" />
         <select id="type">
             <option value="plus">รายรับ</option>
             <option value="minus">รายจ่าย</option>
@@ -80,6 +85,7 @@
         transactions.push(transaction);
         updateStorageAndUI();
         form.reset();
+        document.getElementById('date').value = ''; // รีเซ็ตวันที่
     });
 
     function updateStorageAndUI() {
@@ -87,16 +93,21 @@
         render();
     }
 
+    // ฟังก์ชันลบ
     window.removeTransaction = (id) => {
         transactions = transactions.filter(t => t.id !== id);
         updateStorageAndUI();
     };
 
+    // ฟังก์ชันแก้ไข
     window.editTransaction = (id) => {
         const t = transactions.find(t => t.id === id);
+        const newDate = prompt("แก้ไขวันที่ (YYYY-MM-DD):", t.date);
         const newText = prompt("แก้ไขรายการ:", t.text);
         const newAmount = prompt("แก้ไขจำนวนเงิน:", Math.abs(t.amount));
-        if (newText && newAmount) {
+        
+        if (newDate && newText && newAmount) {
+            t.date = newDate;
             t.text = newText;
             t.amount = t.amount < 0 ? -Math.abs(newAmount) : Math.abs(newAmount);
             updateStorageAndUI();
@@ -106,8 +117,29 @@
     function render() {
         const list = document.getElementById('list');
         list.innerHTML = '';
+        // เรียงลำดับตามวันที่ล่าสุดก่อน
+        transactions.sort((a,b) => new Date(b.date) - new Date(a.date));
+        
         transactions.forEach(t => {
             const li = document.createElement('li');
             li.className = t.amount < 0 ? 'minus' : 'plus';
             li.innerHTML = `
-                <span>${t.date}
+                <span>${t.date} | ${t.text}</span>
+                <span>
+                    ${t.amount > 0 ? '+' : ''}${Math.abs(t.amount).toLocaleString()}
+                    <button class="btn-action edit-btn" onclick="editTransaction(${t.id})">แก้</button>
+                    <button class="btn-action delete-btn" onclick="removeTransaction(${t.id})">ลบ</button>
+                </span>
+            `;
+            list.appendChild(li);
+        });
+        
+        const amounts = transactions.map(t => t.amount);
+        document.getElementById('balance').innerText = '฿' + amounts.reduce((a, b) => a + b, 0).toLocaleString();
+        document.getElementById('money-plus').innerText = '+฿' + amounts.filter(a => a > 0).reduce((a, b) => a + b, 0).toLocaleString();
+        document.getElementById('money-minus').innerText = '-฿' + Math.abs(amounts.filter(a => a < 0).reduce((a, b) => a + b, 0)).toLocaleString();
+    }
+    render();
+</script>
+</body>
+</html>
