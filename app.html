@@ -6,28 +6,29 @@
     <title>บันทึกรายรับ-รายจ่าย</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap');
-        :root { --primary: #3498db; --success: #2ecc71; --danger: #e74c3c; }
-        body { font-family: 'Sarabun', sans-serif; background: #f0f2f5; padding: 20px; display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 450px; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        
+        :root { --primary: #3498db; --success: #2ecc71; --danger: #e74c3c; --bg: #f4f7f6; }
+        body { font-family: 'Sarabun', sans-serif; background: var(--bg); padding: 20px; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 450px; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .navbar { display: flex; justify-content: space-between; margin-bottom: 20px; }
-        .btn-nav { text-decoration: none; color: #666; font-size: 14px; font-weight: 600; padding: 8px 15px; border-radius: 20px; background: #f0f0f0; }
-        
-        .balance-card { text-align: center; margin-bottom: 20px; }
-        #balance { font-size: 32px; font-weight: 700; color: #2c3e50; }
-        
+        .btn-nav { text-decoration: none; color: #555; font-size: 14px; font-weight: 600; padding: 8px 16px; border-radius: 20px; background: #eee; }
+        .balance-card { text-align: center; margin-bottom: 20px; padding: 15px; border-radius: 15px; background: #f8f9fa; border: 1px solid #edf2f7; }
+        #balance { font-size: 36px; font-weight: 700; color: #2c3e50; }
         form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-        input, select { padding: 12px; border: 1px solid #ddd; border-radius: 10px; }
+        input, select { padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 14px; width: 100%; box-sizing: border-box; }
         button#submit-btn { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: 600; }
         
-        li { background: #fff; border: 1px solid #eee; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .btn-action { border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; color: white; margin-left: 5px; }
-        .edit-btn { background: #f39c12; }
-        .delete-btn { background: var(--danger); }
+        /* ส่วนที่ปรับปรุง: พื้นที่แสดงรายการ */
+        #list { height: 350px; overflow-y: auto; padding-right: 5px; border-top: 1px solid #eee; margin-top: 10px; }
+        #list::-webkit-scrollbar { width: 6px; }
+        #list::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
         
-        /* Modal */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
-        .modal-content { background: white; padding: 20px; border-radius: 15px; width: 90%; max-width: 350px; }
+        .date-group { font-size: 13px; font-weight: 600; color: #888; margin: 15px 0 5px 5px; }
+        li { background: #fff; border: 1px solid #f0f0f0; padding: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .btn-action { border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; color: white; font-size: 11px; margin-left: 4px; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: center; padding: 20px; }
+        .modal-content { background: white; padding: 25px; border-radius: 20px; width: 100%; max-width: 320px; text-align: center; }
+        .modal-btn-group { display: flex; gap: 10px; margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -37,78 +38,98 @@
         <a href="index.html" class="btn-nav">← หน้าแรก</a>
         <a href="dashboard.html" class="btn-nav">สรุปผล →</a>
     </div>
-    
     <div class="balance-card">
-        <p style="margin:0; color:#888;">ยอดคงเหลือ</p>
+        <div style="color:#888; font-size: 13px;">ยอดคงเหลือปัจจุบัน</div>
         <div id="balance">฿0.00</div>
     </div>
-
     <form id="form">
         <input type="date" id="date" required>
-        <input type="text" id="text" placeholder="รายการ" required>
+        <input type="text" id="text" placeholder="ชื่อรายการ" required>
         <input type="number" id="amount" placeholder="จำนวนเงิน" required>
         <select id="type"><option value="plus">รายรับ</option><option value="minus">รายจ่าย</option></select>
         <button type="submit" id="submit-btn">บันทึกรายการ</button>
     </form>
-
-    <ul id="list"></ul>
+    <div id="list"></div>
 </div>
 
 <div id="editModal" class="modal">
     <div class="modal-content">
         <h3>แก้ไขรายการ</h3>
-        <input type="date" id="editDate">
-        <input type="text" id="editText">
-        <input type="number" id="editAmount">
-        <button onclick="saveEdit()" style="width:100%; background:var(--success); color:white; border:none; padding:10px; margin-top:10px; border-radius:8px;">บันทึก</button>
+        <input type="date" id="editDate" style="margin-bottom:10px;">
+        <input type="text" id="editText" style="margin-bottom:10px;">
+        <input type="number" id="editAmount" style="margin-bottom:10px;">
+        <select id="editType" style="margin-bottom:10px;">
+            <option value="plus">รายรับ</option>
+            <option value="minus">รายจ่าย</option>
+        </select>
+        <div class="modal-btn-group">
+            <button onclick="saveEdit()" style="flex:2; padding:10px; background:var(--success); color:white; border:none; border-radius:10px;">บันทึก</button>
+            <button onclick="closeModals()" style="flex:1; padding:10px; background:#ccc; border:none; border-radius:10px;">ยกเลิก</button>
+        </div>
+    </div>
+</div>
+
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <h3>ยืนยันการลบ</h3>
+        <p>คุณต้องการลบรายการนี้ใช่หรือไม่?</p>
+        <div class="modal-btn-group">
+            <button onclick="confirmDelete()" style="flex:1; padding:10px; background:var(--danger); color:white; border:none; border-radius:10px;">ลบ</button>
+            <button onclick="closeModals()" style="flex:1; padding:10px; background:#ccc; border:none; border-radius:10px;">ยกเลิก</button>
+        </div>
     </div>
 </div>
 
 <script>
+    document.getElementById('date').value = new Date().toISOString().split('T')[0];
     let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-    let editId = null;
+    let editId = null, deleteId = null;
 
     form.addEventListener('submit', (e) => {
         e.preventDefault();
-        const t = { id: Date.now(), date: date.value, text: text.value, amount: type.value === 'minus' ? -Math.abs(amount.value) : Math.abs(amount.value) };
-        transactions.push(t);
-        update();
-        form.reset();
+        transactions.push({ id: Date.now(), date: document.getElementById('date').value, text: document.getElementById('text').value, amount: document.getElementById('type').value === 'minus' ? -Math.abs(document.getElementById('amount').value) : Math.abs(document.getElementById('amount').value) });
+        update(); form.reset(); document.getElementById('date').value = new Date().toISOString().split('T')[0];
     });
 
-    function update() {
-        localStorage.setItem('transactions', JSON.stringify(transactions));
-        render();
-    }
+    function update() { localStorage.setItem('transactions', JSON.stringify(transactions)); render(); }
 
     function render() {
+        const list = document.getElementById('list');
         list.innerHTML = '';
-        transactions.sort((a,b) => new Date(b.date) - new Date(a.date));
-        transactions.forEach(t => {
-            list.innerHTML += `<li>
-                <div><b>${t.date}</b><br>${t.text}</div>
-                <div><span style="color:${t.amount>0?'#2ecc71':'#e74c3c'}">${t.amount}</span>
-                <button class="btn-action edit-btn" onclick="openEdit(${t.id})">แก้</button>
-                <button class="btn-action delete-btn" onclick="del(${t.id})">ลบ</button></div>
-            </li>`;
-        });
-        const total = transactions.reduce((acc, t) => acc + t.amount, 0);
-        document.getElementById('balance').innerText = '฿' + total.toLocaleString();
+        const grouped = transactions.sort((a,b) => new Date(b.date) - new Date(a.date)).reduce((acc, t) => {
+            (acc[t.date] = acc[t.date] || []).push(t); return acc;
+        }, {});
+        
+        for (const date in grouped) {
+            list.innerHTML += `<div class="date-group">${date}</div>`;
+            grouped[date].forEach(t => {
+                list.innerHTML += `<li>
+                    <span style="font-size: 14px;">${t.text}</span>
+                    <div>
+                        <span style="color:${t.amount>0?'#2ecc71':'#e74c3c'}; font-weight:600; margin-right:10px;">${Math.abs(t.amount).toLocaleString()}</span>
+                        <button class="btn-action" style="background:#f39c12" onclick="openEdit(${t.id})">แก้</button>
+                        <button class="btn-action" style="background:#e74c3c" onclick="showDeleteModal(${t.id})">ลบ</button>
+                    </div>
+                </li>`;
+            });
+        }
+        document.getElementById('balance').innerText = '฿' + transactions.reduce((acc, t) => acc + t.amount, 0).toLocaleString();
     }
-    
-    function del(id) { transactions = transactions.filter(t => t.id !== id); update(); }
+
+    function showDeleteModal(id) { deleteId = id; document.getElementById('deleteModal').style.display = 'flex'; }
+    function confirmDelete() { transactions = transactions.filter(t => t.id !== deleteId); closeModals(); update(); }
+    function closeModals() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
     function openEdit(id) { 
-        editId = id; 
-        const t = transactions.find(t => t.id === id);
-        editDate.value = t.date; editText.value = t.text; editAmount.value = Math.abs(t.amount);
+        editId = id; const t = transactions.find(t => t.id === id);
+        document.getElementById('editDate').value = t.date; document.getElementById('editText').value = t.text; 
+        document.getElementById('editAmount').value = Math.abs(t.amount); document.getElementById('editType').value = t.amount >= 0 ? 'plus' : 'minus';
         document.getElementById('editModal').style.display = 'flex';
     }
     function saveEdit() {
         const t = transactions.find(t => t.id === editId);
-        t.date = editDate.value; t.text = editText.value; 
-        t.amount = t.amount < 0 ? -Math.abs(editAmount.value) : Math.abs(editAmount.value);
-        document.getElementById('editModal').style.display = 'none';
-        update();
+        t.date = document.getElementById('editDate').value; t.text = document.getElementById('editText').value; 
+        t.amount = document.getElementById('editType').value === 'minus' ? -Math.abs(document.getElementById('editAmount').value) : Math.abs(document.getElementById('editAmount').value);
+        closeModals(); update();
     }
     render();
 </script>
