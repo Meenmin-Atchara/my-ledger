@@ -6,46 +6,31 @@
     <title>ระบบบันทึกรายรับ-รายจ่าย</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap');
-        
         * { box-sizing: border-box; }
-        body { font-family: 'Sarabun', sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
+        body { font-family: 'Sarabun', sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; display: flex; justify-content: center; min-height: 100vh; }
         .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); width: 100%; max-width: 400px; }
         
-        .header { text-align: center; margin-bottom: 30px; }
-        .header a { text-decoration: none; color: #2c3e50; }
-        .header h2 { text-align: center; color: #2c3e50; margin: 0; }
-        .header-nav { text-align: center; margin-top: 10px; }
-        .header-nav a { color: #3498db; font-size: 14px; text-decoration: none; }
-        .header-nav a:hover { text-decoration: underline; }
-        
-        h2 { text-align: center; color: #2c3e50; margin-top: 0; }
-        
+        .header { text-align: center; margin-bottom: 20px; }
         .balance-container { text-align: center; margin-bottom: 20px; }
-        .balance-container h4 { margin: 0; color: #7f8c8d; text-transform: uppercase; font-size: 14px;}
-        #balance { font-size: 32px; font-weight: 600; color: #2c3e50; margin: 5px 0; }
+        #balance { font-size: 32px; font-weight: 600; color: #2c3e50; }
         
-        .inc-exp-container { display: flex; justify-content: space-between; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #eee; }
-        .inc-exp-container > div { flex: 1; text-align: center; }
-        .inc-exp-container > div:first-child { border-right: 1px solid #eee; }
-        .inc-exp-container h4 { margin: 0; font-size: 14px; color: #7f8c8d; }
-        .money { font-size: 20px; font-weight: 600; margin: 5px 0 0 0; }
-        .money.plus { color: #2ecc71; }
-        .money.minus { color: #e74c3c; }
+        .inc-exp-container { display: flex; justify-content: space-between; padding: 15px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 20px; }
+        .money { font-size: 18px; font-weight: 600; margin-top: 5px; }
+        .plus { color: #2ecc71; }
+        .minus { color: #e74c3c; }
         
         form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px; }
-        input, select { padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-family: 'Sarabun', sans-serif; font-size: 15px; }
-        input:focus, select:focus { outline: none; border-color: #3498db; }
-        button { background-color: #3498db; color: white; border: none; padding: 12px; cursor: pointer; font-size: 16px; border-radius: 6px; font-weight: 600; font-family: 'Sarabun', sans-serif; transition: background 0.3s; }
-        button:hover { background-color: #2980b9; }
+        input, select { padding: 12px; border: 1px solid #ddd; border-radius: 6px; }
+        button { background-color: #3498db; color: white; border: none; padding: 12px; cursor: pointer; border-radius: 6px; font-weight: 600; }
         
-        h3 { border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px; color: #2c3e50; font-size: 18px;}
-        ul { list-style-type: none; padding: 0; margin: 0; }
-        li { background: #f9f9f9; border: 1px solid #eee; padding: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-radius: 6px; position: relative; }
-        li.plus { border-right: 5px solid #2ecc71; }
-        li.minus { border-right: 5px solid #e74c3c; }
-        .delete-btn { cursor: pointer; color: white; background: #e74c3c; border: none; border-radius: 4px; padding: 4px 8px; font-size: 12px; opacity: 0; transition: opacity 0.3s ease; position: absolute; right: -40px; }
-        li:hover .delete-btn { opacity: 1; transform: translateX(-45px); }
-        .transaction-info { display: flex; justify-content: space-between; width: 100%; }
+        ul { list-style: none; padding: 0; }
+        li { background: #f9f9f9; padding: 10px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; border-radius: 6px; border-right: 5px solid #ccc; }
+        li.plus { border-right-color: #2ecc71; }
+        li.minus { border-right-color: #e74c3c; }
+        
+        .btn-action { border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; color: white; margin-left: 5px; }
+        .edit-btn { background: #f39c12; }
+        .delete-btn { background: #e74c3c; }
     </style>
 </head>
 <body>
@@ -53,9 +38,7 @@
 <div class="container">
     <div class="header">
         <h2>บันทึกรายรับ-รายจ่าย</h2>
-        <div class="header-nav">
-            <a href="index.html">← กลับหน้าแรก</a>
-        </div>
+        <a href="index.html">กลับหน้าแรก</a>
     </div>
     
     <div class="balance-container">
@@ -64,110 +47,67 @@
     </div>
 
     <div class="inc-exp-container">
-        <div>
-            <h4>รายรับ</h4>
-            <p id="money-plus" class="money plus">+฿0.00</p>
-        </div>
-        <div>
-            <h4>รายจ่าย</h4>
-            <p id="money-minus" class="money minus">-฿0.00</p>
-        </div>
+        <div><h4>รายรับ</h4><p id="money-plus" class="money plus">+฿0.00</p></div>
+        <div><h4>รายจ่าย</h4><p id="money-minus" class="money minus">-฿0.00</p></div>
     </div>
 
     <form id="form">
-        <input type="text" id="text" placeholder="ระบุรายการ (เช่น เงินเดือน, ค่าอาหาร)" required autocomplete="off" />
-        <input type="number" id="amount" placeholder="จำนวนเงิน" required min="1" step="any" />
+        <input type="date" id="date" required />
+        <input type="text" id="text" placeholder="รายการ" required />
+        <input type="number" id="amount" placeholder="จำนวนเงิน" required min="1" />
         <select id="type">
-            <option value="minus">รายจ่าย</option>
             <option value="plus">รายรับ</option>
+            <option value="minus">รายจ่าย</option>
         </select>
         <button type="submit">เพิ่มรายการ</button>
     </form>
 
-    <h3>ประวัติการทำรายการ</h3>
     <ul id="list"></ul>
 </div>
 
 <script>
-    const balance = document.getElementById('balance');
-    const money_plus = document.getElementById('money-plus');
-    const money_minus = document.getElementById('money-minus');
-    const list = document.getElementById('list');
+    let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+
     const form = document.getElementById('form');
-    const text = document.getElementById('text');
-    const amount = document.getElementById('amount');
-    const type = document.getElementById('type');
-
-    // ดึงข้อมูลจาก localStorage
-    const localStorageTransactions = JSON.parse(localStorage.getItem('transactions'));
-    let transactions = localStorage.getItem('transactions') !== null ? localStorageTransactions : [];
-
-    // เพิ่มรายการใหม่
-    function addTransaction(e) {
+    form.addEventListener('submit', (e) => {
         e.preventDefault();
         const transaction = {
-            id: generateID(),
-            text: text.value,
-            amount: type.value === 'minus' ? -Math.abs(amount.value) : Math.abs(amount.value)
+            id: Date.now(),
+            date: document.getElementById('date').value,
+            text: document.getElementById('text').value,
+            amount: document.getElementById('type').value === 'minus' ? -Math.abs(document.getElementById('amount').value) : Math.abs(document.getElementById('amount').value)
         };
         transactions.push(transaction);
-        addTransactionDOM(transaction);
-        updateValues();
-        updateLocalStorage();
-        text.value = '';
-        amount.value = '';
-    }
+        updateStorageAndUI();
+        form.reset();
+    });
 
-    function generateID() { return Math.floor(Math.random() * 100000000); }
-
-    // แสดงผลรายการในหน้าเว็บ
-    function addTransactionDOM(transaction) {
-        const sign = transaction.amount < 0 ? '-' : '+';
-        const item = document.createElement('li');
-        item.classList.add(transaction.amount < 0 ? 'minus' : 'plus');
-        item.innerHTML = `
-            <div class="transaction-info">
-                <span>${transaction.text}</span>
-                <span>${sign}฿${Math.abs(transaction.amount).toLocaleString('th-TH', {minimumFractionDigits: 2})}</span>
-            </div>
-            <button class="delete-btn" onclick="removeTransaction(${transaction.id})">ลบ</button>
-        `;
-        list.appendChild(item);
-    }
-
-    // คำนวณยอดรวม รายรับ รายจ่าย
-    function updateValues() {
-        const amounts = transactions.map(transaction => transaction.amount);
-        const total = amounts.reduce((acc, item) => (acc += item), 0);
-        const income = amounts.filter(item => item > 0).reduce((acc, item) => (acc += item), 0);
-        const expense = amounts.filter(item => item < 0).reduce((acc, item) => (acc += item), 0) * -1;
-
-        balance.innerText = `฿${total.toLocaleString('th-TH', {minimumFractionDigits: 2})}`;
-        money_plus.innerText = `+฿${income.toLocaleString('th-TH', {minimumFractionDigits: 2})}`;
-        money_minus.innerText = `-฿${expense.toLocaleString('th-TH', {minimumFractionDigits: 2})}`;
-    }
-
-    // ลบรายการ
-    window.removeTransaction = function(id) {
-        transactions = transactions.filter(transaction => transaction.id !== id);
-        updateLocalStorage();
-        init();
-    }
-
-    // อัปเดต localStorage
-    function updateLocalStorage() {
+    function updateStorageAndUI() {
         localStorage.setItem('transactions', JSON.stringify(transactions));
+        render();
     }
 
-    // เริ่มต้นการทำงาน
-    function init() {
+    window.removeTransaction = (id) => {
+        transactions = transactions.filter(t => t.id !== id);
+        updateStorageAndUI();
+    };
+
+    window.editTransaction = (id) => {
+        const t = transactions.find(t => t.id === id);
+        const newText = prompt("แก้ไขรายการ:", t.text);
+        const newAmount = prompt("แก้ไขจำนวนเงิน:", Math.abs(t.amount));
+        if (newText && newAmount) {
+            t.text = newText;
+            t.amount = t.amount < 0 ? -Math.abs(newAmount) : Math.abs(newAmount);
+            updateStorageAndUI();
+        }
+    };
+
+    function render() {
+        const list = document.getElementById('list');
         list.innerHTML = '';
-        transactions.forEach(addTransactionDOM);
-        updateValues();
-    }
-
-    init();
-    form.addEventListener('submit', addTransaction);
-</script>
-</body>
-</html>
+        transactions.forEach(t => {
+            const li = document.createElement('li');
+            li.className = t.amount < 0 ? 'minus' : 'plus';
+            li.innerHTML = `
+                <span>${t.date}
