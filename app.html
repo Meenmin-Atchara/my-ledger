@@ -263,6 +263,21 @@
             flex-wrap:wrap;
         }
 
+        .table-footer{
+            display:flex;
+            justify-content:space-between;
+            gap:12px;
+            padding:16px;
+            background:#0f172a;
+            color:#fff;
+            font-weight:700;
+            flex-wrap:wrap;
+        }
+
+        .table-footer .balance-value{
+            color:#a7f3d0;
+        }
+
         .footer-summary{
             background:#0f172a;
             color:#fff;
@@ -467,10 +482,11 @@
                     </tr>
                 </thead>
                 <tbody id="transaction-table-body"></tbody>
-                <tfoot>
-                    <tr><td colspan="5" id="footer-summary" class="footer-summary">ยอดรวมสุทธิ: 0 ฿</td></tr>
-                </tfoot>
             </table>
+            <div class="table-footer">
+                <div id="footer-summary">ยอดรวมสุทธิ: 0 ฿</div>
+                <div id="footer-balance" class="balance-value">ยอดคงเหลือ: 0 ฿</div>
+            </div>
         </section>
     </main>
 
@@ -620,6 +636,7 @@
             const filtered = getFilteredTransactions();
             const tbody = document.getElementById('transaction-table-body');
             const summaryText = document.getElementById('footer-summary');
+            const balanceText = document.getElementById('footer-balance');
 
             tbody.innerHTML = '';
             let income = 0, expense = 0, totalFiltered = 0;
@@ -646,10 +663,12 @@
                 `;
             });
 
+            const balance = income - expense;
             document.getElementById('total-income').innerText = income.toLocaleString();
             document.getElementById('total-expense').innerText = expense.toLocaleString();
-            document.getElementById('balance').innerText = (income - expense).toLocaleString();
+            document.getElementById('balance').innerText = balance.toLocaleString();
             summaryText.innerText = `ยอดรวมสุทธิจากการค้นหา: ${totalFiltered.toLocaleString()} ฿`;
+            balanceText.innerText = `ยอดคงเหลือ: ${balance.toLocaleString()} ฿`;
         }
 
         function deleteTransaction(index) {
@@ -674,13 +693,13 @@
                 return;
             }
 
-            let csv = 'วันที่,ประเภท,รายการ,จำนวน\n';
+            let csv = 'วันที่,ประเภท,รายการ,จำนวน\\n';
             filtered.forEach(t => {
                 const amount = parseFloat(t.amount);
-                csv += `${t.date.split('-').reverse().join('/')},${amount > 0 ? 'รายรับ' : 'รายจ่าย'},${t.text},${Math.abs(amount)}\n`;
+                csv += `${t.date.split('-').reverse().join('/')},${amount > 0 ? 'รายรับ' : 'รายจ่าย'},${t.text},${Math.abs(amount)}\\n`;
             });
 
-            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+            const blob = new Blob(['\\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
