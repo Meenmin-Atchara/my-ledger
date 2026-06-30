@@ -118,7 +118,6 @@
         .btn:hover{ transform:translateY(-1px); }
         .btn-primary{ background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:#fff; box-shadow:0 12px 24px rgba(99,102,241,.22); }
         .btn-secondary{ background:#eef2ff; color:var(--primary-dark); }
-        .btn-success{ background:linear-gradient(135deg,#22c55e,#16a34a); color:#fff; }
         .btn-danger{ background:#fee2e2; color:#b91c1c; }
         .btn-warning{ background:#fef3c7; color:#b45309; }
         .btn-export{ background:linear-gradient(135deg,#0ea5e9,#2563eb); color:#fff; box-shadow:0 12px 24px rgba(14,165,233,.18); }
@@ -549,8 +548,9 @@
                 .map((t, index) => ({ ...t, _index: index }))
                 .filter(t => {
                     const amount = parseFloat(t.amount);
-                    return ((!dateFrom || t.date >= dateFrom) && (!dateTo || t.date <= dateTo)) &&
-                        (typeFilter === 'all' || (typeFilter === 'income' ? amount > 0 : amount < 0));
+                    const matchDate = (!dateFrom || t.date >= dateFrom) && (!dateTo || t.date <= dateTo);
+                    const matchType = typeFilter === 'all' || (typeFilter === 'income' ? amount > 0 : amount < 0);
+                    return matchDate && matchType;
                 })
                 .sort((a, b) => new Date(b.date) - new Date(a.date));
         }
@@ -685,13 +685,14 @@
                 return;
             }
 
-            let csv = 'วันที่,ประเภท,รายการ,จำนวน\\n';
+            let csv = 'วันที่,ประเภท,รายการ,จำนวน\n';
             filtered.forEach(t => {
                 const amount = parseFloat(t.amount);
-                csv += `${t.date.split('-').reverse().join('/')},${amount > 0 ? 'รายรับ' : 'รายจ่าย'},${t.text},${Math.abs(amount)}\\n`;
+                const dateText = t.date.split('-').reverse().join('/');
+                csv += `${dateText},${amount > 0 ? 'รายรับ' : 'รายจ่าย'},${t.text},${Math.abs(amount)}\n`;
             });
 
-            const blob = new Blob(['\\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
