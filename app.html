@@ -515,9 +515,7 @@
             <div class="confirm-head">
                 <h3>ยืนยันการลบ</h3>
             </div>
-            <div class="confirm-body" id="confirm-text">
-                ต้องการลบรายการนี้หรือไม่
-            </div>
+            <div class="confirm-body" id="confirm-text">ต้องการลบรายการนี้หรือไม่</div>
             <div class="confirm-actions">
                 <button class="btn btn-secondary" onclick="closeConfirmModal()">ยกเลิก</button>
                 <button class="btn btn-danger" id="confirm-delete-btn">ลบรายการ</button>
@@ -671,15 +669,18 @@
 
         function exportToCSV() {
             const filtered = getFilteredTransactions();
-            if (filtered.length === 0) { alert('ไม่มีข้อมูลให้ Export'); return; }
+            if (filtered.length === 0) {
+                alert('ไม่มีข้อมูลให้ Export');
+                return;
+            }
 
-            let csv = 'วันที่,ประเภท,รายการ,จำนวน\\n';
+            let csv = 'วันที่,ประเภท,รายการ,จำนวน\n';
             filtered.forEach(t => {
                 const amount = parseFloat(t.amount);
-                csv += `${t.date.split('-').reverse().join('/')},${amount > 0 ? 'รายรับ' : 'รายจ่าย'},${t.text},${Math.abs(amount)}\\n`;
+                csv += `${t.date.split('-').reverse().join('/')},${amount > 0 ? 'รายรับ' : 'รายจ่าย'},${t.text},${Math.abs(amount)}\n`;
             });
 
-            const blob = new Blob(['\\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
